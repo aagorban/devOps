@@ -1,0 +1,28 @@
+Vagrant.configure("2") do |config|
+  config.vm.define "webserver" do |webserver|
+    webserver.vm.box = "generic/debian12"
+    webserver.vm.network "public_network"
+    webserver.vm.synced_folder "./data", "/vagrant_data"
+    webserver.vm.provision "shell", inline: <<-SHELL
+      apt-get update -qq
+      apt-get install -y apache2
+    SHELL
+  end
+
+  config.vm.define "privateserver" do |privateserver|
+	privateserver.vm.box = "generic/debian12"
+	privateserver.vm.network "private_network", ip: "192.168.33.10"
+	privateserver.vm.synced_folder "./data", "/vagrant_data"
+	privateserver.vm.provision "shell", path: "provision.sh" 
+  end
+
+  config.vm.define "publicserver" do |publicserver|
+    publicserver.vm.box = "generic/debian12"
+    publicserver.vm.network "public_network", ip: "192.168.0.100", bridge: "Intel(R) Wi-Fi 6 AX201 160MHz"
+    publicserver.vm.synced_folder "./data", "/vagrant_data"
+    publicserver.vm.provision "shell", inline: <<-SHELL
+		apt-get update -qq
+		apt-get install -y apache2
+    SHELL
+  end
+end
