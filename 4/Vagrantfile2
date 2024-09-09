@@ -1,0 +1,24 @@
+Vagrant.configure("2") do |config|
+
+  base_config = {
+    box: "generic/debian12",
+    network: "public_network",
+    synced_folder: ["./data", "/vagrant_data"],
+    provision: {
+      type: "shell",
+      inline: <<-SHELL
+        apt-get update -qq
+        apt-get install -y apache2
+      SHELL
+    }
+  }
+
+  (1..3).each do |i|
+    config.vm.define "webserver#{i}" do |webserver|
+      webserver.vm.box = base_config[:box]
+      webserver.vm.network base_config[:network]
+      webserver.vm.synced_folder base_config[:synced_folder][0], base_config[:synced_folder][1]
+      webserver.vm.provision base_config[:provision][:type], inline: base_config[:provision][:inline]
+    end
+  end
+end
