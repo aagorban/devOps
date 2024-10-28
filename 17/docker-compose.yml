@@ -1,0 +1,36 @@
+version: '3.9'
+
+services:
+    webserver:
+        image: nginx:latest
+        ports:
+            - '80'
+        volumes:
+            - ./web-data:/usr/share/nginx/html
+        networks:
+            - appnet
+
+    database:
+        image: postgres:latest
+        ports:
+            - '5432:5432'
+        environment:
+            POSTGRES_DB: example
+            POSTGRES_USER: postgres
+            POSTGRES_PASSWORD: marcus
+        volumes:
+            - db-data:/var/lib/postgresql/data
+        networks:
+            - appnet
+
+    cache:
+        image: redis:latest
+        networks:
+            - appnet
+
+networks:
+    appnet:
+
+volumes:
+    db-data:
+    web-data:
