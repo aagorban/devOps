@@ -1,0 +1,15 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+    name: hello-eks-job
+spec:
+    template:
+        metadata:
+            name: hello-eks-job
+        spec:
+            containers:
+                - name: hello
+                  image: busybox
+                  command: ['sh', '-c', "echo 'Hello from EKS!'"]
+            restartPolicy: Never
+    backoffLimit: 4
