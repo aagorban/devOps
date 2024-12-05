@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: Pod
+metadata:
+    name: data-storage
+spec:
+    containers:
+        - name: busybox
+          image: busybox
+          command: ['sleep', '3600']
+          volumeMounts:
+              - mountPath: /data
+                name: ebs-volume
+    volumes:
+        - name: ebs-volume
+          persistentVolumeClaim:
+              claimName: my-pvc
