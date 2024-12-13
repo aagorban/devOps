@@ -1,0 +1,140 @@
+AWSTemplateFormatVersion: '2010-09-09'
+
+Description: >
+    Template for create VPC, EC2, IAM Role, та S3.
+
+Parameters:
+    InstanceType:
+        Description: EC2 instance type
+        Type: String
+        Default: t2.micro
+        AllowedValues:
+            - t2.micro
+            - t2.small
+            - t2.medium
+        ConstraintDescription: Must be a valid EC2 instance type.
+
+Resources:
+    MyVPC:
+        Type: 'AWS::EC2::VPC'
+        Properties:
+            CidrBlock: '10.0.0.0/16'
+            EnableDnsSupport: true
+            EnableDnsHostnames: true
+            Tags:
+                - Key: Name
+                  Value: MyVPC
+
+    MySubnet:
+        Type: 'AWS::EC2::Subnet'
+        Properties:
+            VpcId: !Ref MyVPC
+            CidrBlock: '10.0.1.0/24'
+            MapPublicIpOnLaunch: true
+            AvailabilityZone: !Select [0, !GetAZs '']
+            Tags:
+                - Key: Name
+                  Value: MyPublicSubnet
+
+    MyInternetGateway:
+        Type: 'AWS::EC2::InternetGateway'
+        Properties:
+            Tags:
+                - Key: Name
+                  Value: MyInternetGateway
+
+    MyVPCGatewayAttachment:
+        Type: 'AWS::EC2::VPCGatewayAttachment'
+        Properties:
+            VpcId: !Ref MyVPC
+            InternetGatewayId: !Ref MyInternetGateway
+
+    MyRouteTable:
+        Type: 'AWS::EC2::RouteTable'
+        Properties:
+            VpcId: !Ref MyVPC
+            Tags:
+                - Key: Name
+                  Value: MyPublicRouteTable
+
+    MyRoute:
+        Type: 'AWS::EC2::Route'
+        Properties:
+            RouteTableId: !Ref MyRouteTable
+            DestinationCidrBlock: '0.0.0.0/0'
+            GatewayId: !Ref MyInternetGateway
+
+    MySubnetRouteTableAssociation:
+        Type: 'AWS::EC2::SubnetRouteTableAssociation'
+        Properties:
+            SubnetId: !Ref MySubnet
+            RouteTableId: !Ref MyRouteTable
+
+    MyIAMRole:
+        Type: 'AWS::IAM::Role'
+        Properties:
+            AssumeRolePolicyDocument:
+                Version: '2012-10-17'
+                Statement:
+                    - Effect: Allow
+                      Principal:
+                          Service: 'ec2.amazonaws.com'
+                      Action: 'sts:AssumeRole'
+            Path: '/'
+            ManagedPolicyArns:
+                - 'arn:aws:iam::aws:policy/AmazonS3ReadOnlyAccess'
+            Tags:
+                - Key: Name
+                  Value: MyEC2Role
+
+    MyInstanceProfile:
+        Type: 'AWS::IAM::InstanceProfile'
+        Properties:
+            Roles:
+                - !Ref MyIAMRole
+            Path: '/'
+
+    MyEC2Instance:
+        Type: 'AWS::EC2::Instance'
+        Properties:
+            InstanceType: !Ref InstanceType
+            ImageId: 'ami-0166fe664262f664c'
+            SubnetId: !Ref MySubnet
+            IamInstanceProfile: !Ref MyInstanceProfile
+            Tags:
+                - Key: Name
+                  Value: MyEC2Instance
+
+    MyS3Bucket:
+        Type: 'AWS::S3::Bucket'
+        Properties:
+            BucketName: !Sub 'my-s3-bucket-${AWS::AccountId}-${AWS::Region}'
+            VersioningConfiguration:
+                Status: Enabled
+            Tags:
+                - Key: Name
+                  Value: MyS3Bucket
+
+    MyS3BucketPolicy:
+        Type: 'AWS::S3::BucketPolicy'
+        Properties:
+            Bucket: !Ref MyS3Bucket
+            PolicyDocument:
+                Version: '2012-10-17'
+                Statement:
+                    - Effect: Deny
+                      Principal: '*'
+                      Action: 's3:*'
+                      Resource: !Sub 'arn:aws:s3:::${MyS3Bucket}/*'
+                      Condition:
+                          Bool:
+                              aws:SecureTransport: false
+
+Outputs:
+    EC2PublicIP:
+        Description: Public IP address of the EC2 instance
+        Value: !GetAtt MyEC2Instance.PublicIp
+
+    S3BucketName:
+        Description: Name of the created S3 bucket
+        Value: !Ref MyS3Bucket
