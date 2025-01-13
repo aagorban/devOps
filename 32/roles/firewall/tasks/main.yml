@@ -1,0 +1,21 @@
+---
+- name: Ensure firewalld is running
+  service:
+    name: firewalld
+    state: started
+    enabled: true
+
+- name: Allow SSH
+  firewalld:
+    service: ssh
+    state: enabled
+    immediate: true
+
+- name: Allow HTTP
+  firewalld:
+    port: 80/tcp
+    permanent: true
+    state: enabled
+
+- name: Reload firewalld
+  command: firewall-cmd --reload

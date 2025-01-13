@@ -1,0 +1,8 @@
+---
+- name: Configure baseline, firewall, and Nginx
+  hosts: all
+  become: true
+  roles:
+    - baseline
+    - firewall
+    - nginx
