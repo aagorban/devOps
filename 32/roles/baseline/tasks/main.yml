@@ -1,0 +1,11 @@
+---
+- name: Install basic packages
+  apt:
+    name: "{{ item }}"
+    state: present
+    update_cache: yes
+  with_items:
+    - vim
+    - git
+    - mc
+    - firewalld
