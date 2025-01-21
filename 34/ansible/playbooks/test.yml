@@ -1,0 +1,5 @@
+- name: Test AWS Inventory
+  hosts: all
+  tasks:
+    - name: Ping all hosts
+      ansible.builtin.ping:

@@ -1,0 +1,6 @@
+---
+- name: Install OpenJDK 17
+  apt:
+    name: openjdk-17-jdk
+    state: present
+    update_cache: yes
