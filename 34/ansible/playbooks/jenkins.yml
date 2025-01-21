@@ -1,0 +1,8 @@
+---
+- name: Install and configure Jenkins
+  hosts: jenkins-master
+  become: yes
+
+  roles:
+    - role: roles/jenkins
+

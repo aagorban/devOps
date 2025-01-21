@@ -1,0 +1,7 @@
+---
+- name: Install docker
+  hosts: jenkins-worker
+  become: yes
+
+  roles:
+    - role: roles/java
