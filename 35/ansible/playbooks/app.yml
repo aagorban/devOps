@@ -1,0 +1,10 @@
+---
+- name: Install docker
+  hosts: app
+  become: yes
+
+  roles:
+    - role: roles/docker
+    - role: roles/nginx
+    - role: roles/node_exporter
+    - role: roles/cp_files_app
