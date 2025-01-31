@@ -1,0 +1,22 @@
+---
+- name: Встановити PostgreSQL client (psql)
+  apt:
+    name: postgresql-client
+    state: present
+    update_cache: yes
+
+- name: Копіювати файли на сервер
+  ansible.builtin.synchronize:
+    src: "../../db_setup"
+    dest: "/home/ubuntu"
+    recursive: yes
+
+- name: Зробити setup.sh виконуваним
+  file:
+    path: db_setup/setup.sh
+    mode: '0755'
+
+- name: Запустити setup.sh для налаштування БД
+  shell: db_setup/setup.sh
+  args:
+   executable: /bin/bash
