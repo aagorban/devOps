@@ -1,2 +1,2 @@
-db_user = "myuser"
-db_password = "mypassword"
+db_user = "postgres"
+db_password = "postgres"

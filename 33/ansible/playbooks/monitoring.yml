@@ -1,11 +1,9 @@
 ---
 - name: Install docker
-  hosts: app
+  hosts: monitoring
   become: yes
 
   roles:
     - role: roles/docker
-    - role: roles/db
+    - role: roles/cp_files_monitoring
     - role: roles/node_exporter
-    - role: roles/nginx
-    - role: roles/cp_files_app
