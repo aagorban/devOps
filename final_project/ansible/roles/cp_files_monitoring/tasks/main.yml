@@ -1,0 +1,12 @@
+---
+- name: Копіювати файли на сервер
+  ansible.builtin.synchronize:
+    src: "../../monitoring"
+    dest: "/etc"
+    recursive: yes
+
+- name: Запустити Docker Compose у папці /etc/monitoring
+  ansible.builtin.shell: |
+    docker-compose up -d
+  args:
+    chdir: /etc/monitoring

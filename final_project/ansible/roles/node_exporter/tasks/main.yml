@@ -1,0 +1,44 @@
+---
+# Завантаження архіву Node Exporter
+- name: Download Node Exporter archive
+  ansible.builtin.get_url:
+    url: "{{ node_exporter_download_url }}"
+    dest: /tmp/node_exporter.tar.gz
+  when: node_exporter_install
+
+# Розпакування архіву
+- name: Extract Node Exporter archive
+  ansible.builtin.unarchive:
+    src: /tmp/node_exporter.tar.gz
+    dest: /opt/
+    remote_src: yes
+  when: node_exporter_install
+
+# Переміщення Node Exporter
+- name: Move Node Exporter binary
+  ansible.builtin.copy:
+    remote_src: yes
+    src: "/opt/{{ node_exporter_folder }}/node_exporter"
+    dest: /usr/local/bin/node_exporter
+    mode: '0755'
+  when: node_exporter_install
+
+# Видалення тимчасових файлів
+- name: Clean up temporary files
+  ansible.builtin.file:
+    path: /tmp/node_exporter.tar.gz
+    state: absent
+
+# Створення systemd-сервісу
+- name: Create systemd service for Node Exporter
+  ansible.builtin.template:
+    src: node_exporter.service.j2
+    dest: /etc/systemd/system/node_exporter.service
+  notify: Restart Node Exporter
+
+# Увімкнення та запуск Node Exporter
+- name: Enable and start Node Exporter service
+  ansible.builtin.systemd:
+    name: node_exporter
+    enabled: yes
+    state: started

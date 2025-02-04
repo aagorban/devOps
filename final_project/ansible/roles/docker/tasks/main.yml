@@ -1,0 +1,62 @@
+---
+- name: Оновлення пакунків та встановлення залежностей
+  apt:
+    update_cache: yes
+    cache_valid_time: 3600
+    name:
+      - apt-transport-https
+      - ca-certificates
+      - curl
+      - software-properties-common
+    state: present
+
+- name: Додавання GPG ключа Docker
+  apt_key:
+    url: https://download.docker.com/linux/ubuntu/gpg
+    state: present
+
+- name: Додавання репозиторію Docker
+  apt_repository:
+    repo: "deb [arch=amd64] https://download.docker.com/linux/ubuntu bionic stable"
+    state: present
+
+- name: Встановлення Docker
+  apt:
+    name: docker-ce
+    state: present
+    update_cache: yes
+
+- name: Перевірка статусу Docker
+  service_facts:
+
+- name: Запуск та увімкнення Docker
+  service:
+    name: docker
+    state: started
+    enabled: yes
+
+- name: Отримання інформації про архітектуру та операційну систему
+  shell: "uname -s -m"
+  register: system_info
+  changed_when: false
+
+- name: Завантаження Docker Compose
+  get_url:
+    url: "https://github.com/docker/compose/releases/download/1.29.2/docker-compose-{{ system_info.stdout.split(' ')[0] }}-{{ system_info.stdout.split(' ')[1] }}"
+    dest: "/usr/local/bin/docker-compose"
+    mode: 'u+x'
+
+- name: Перевірка версії Docker Compose
+  command: "/usr/local/bin/docker-compose --version"
+  register: compose_version_output
+  changed_when: false
+
+- name: Виведення версії Docker Compose
+  debug:
+    var: compose_version_output.stdout
+
+- name: Перезапуск Docker (за потреби)
+  service:
+    name: docker
+    state: restarted
+  when: compose_version_output.stdout is defined

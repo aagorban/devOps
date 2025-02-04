@@ -1,0 +1,49 @@
+- name: Install Nginx
+  apt:
+    name: nginx
+    state: present
+    update_cache: yes
+
+- name: Deploy Nginx configuration
+  template:
+    src: nginx.conf.j2
+    dest: /etc/nginx/nginx.conf
+
+- name: Set correct permissions for Nginx configuration
+  file:
+    path: /etc/nginx/nginx.conf
+    owner: root
+    group: root
+    mode: '0644'
+
+- name: Remove default Nginx configurations
+  file:
+    path: "{{ item }}"
+    state: absent
+  loop:
+    - /etc/nginx/sites-enabled/default
+    - /etc/nginx/conf.d/default.conf
+
+- name: Validate Nginx configuration
+  command: nginx -t
+  register: nginx_test
+  changed_when: false
+
+- debug:
+    var: nginx_test.stdout
+
+- name: Deploy index.html
+  template:
+    src: index.html.j2
+    dest: /usr/share/nginx/html/index.html
+
+- name: Ensure Nginx is running
+  service:
+    name: nginx
+    state: started
+    enabled: true
+
+- name: Reload Nginx
+  service:
+    name: nginx
+    state: reloaded
