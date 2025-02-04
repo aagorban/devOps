@@ -7,7 +7,7 @@
 
 #- name: Запустити Docker Compose у папці /etc/monitoring
 #  ansible.builtin.shell: |
-#    docker run -d --name=promtail -v /var/log/nginx:/var/log/nginx -v /etc/promtail/promtail-config.yml:/etc/promtail/promtail-config.yml grafana/promtail:latest -config.file=/etc/promtail/promtail-config.yml
-#
+    docker run -d --name=promtail -v /var/log/nginx:/var/log/nginx -v /etc/promtail/promtail-config.yml:/etc/promtail/promtail-config.yml grafana/promtail:latest -config.file=/etc/promtail/promtail-config.yml
+
 #  args:
 #    chdir: /
