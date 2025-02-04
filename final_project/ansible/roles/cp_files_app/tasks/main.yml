@@ -1,0 +1,10 @@
+---
+- name: Копіювати файли на сервер
+  ansible.builtin.synchronize:
+    src: "../../app"
+    dest: "/home/ubuntu"
+    recursive: yes
+
+- name: Запустити Promtail
+  ansible.builtin.shell: |
+    sudo docker run -d --name=promtail -v /var/log/nginx:/var/log/nginx -v /home/ubuntu/app/promtail/promtail-config.yml:/etc/promtail/promtail-config.yml grafana/promtail:latest -config.file=/etc/promtail/promtail-config.yml

@@ -1,0 +1,34 @@
+---
+- name: Встановити PostgreSQL client (psql)
+  apt:
+    name: postgresql-client
+    state: present
+    update_cache: yes
+
+- name: Встановити dos2unix
+  apt:
+    name: dos2unix
+    state: present
+    update_cache: yes
+
+- name: Копіювати файли на сервер
+  ansible.builtin.synchronize:
+    src: "../../db_setup"
+    dest: "/home/ubuntu"
+    recursive: yes
+
+- name: Перетворити .env файл з формату DOS на UNIX
+  command: dos2unix /home/ubuntu/db_setup/.env
+
+- name: Перетворити setup.sh файл з формату DOS на UNIX
+  command: dos2unix /home/ubuntu/db_setup/setup.sh
+
+- name: Зробити setup.sh виконуваним
+  file:
+    path: /home/ubuntu/db_setup/setup.sh
+    mode: '0755'
+
+- name: Запустити setup.sh для налаштування БД
+  shell: /home/ubuntu/db_setup/setup.sh
+  args:
+    executable: /bin/bash
